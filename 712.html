@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 7 — Do problema ao programa</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f6f9;color:#1a1a2e;min-height:100vh}
+  .w{padding:1.5rem 1rem 3rem;max-width:780px;margin:0 auto}
+  .hdr{background:#1a3a5c;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.25rem}
+  .hdr-tag{font-size:11px;color:#93c5fd;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;font-family:monospace}
+  .hdr h2{font-size:20px;font-weight:600;color:#fff;margin-bottom:4px}
+  .hdr p{font-size:13px;color:#93c5fd;line-height:1.5}
+  .prog{display:flex;gap:6px;margin-bottom:1.25rem}
+  .ps{flex:1;background:#e8edf2;border:1.5px solid #cdd5df;border-radius:8px;padding:8px 10px;text-align:center}
+  .ps.active{background:#dbeafe;border-color:#3b82f6}
+  .ps.done{background:#dcfce7;border-color:#22c55e}
+  .ps-n{font-size:10px;color:#8a96a3;font-family:monospace;margin-bottom:2px}
+  .ps.active .ps-n{color:#1d4ed8}
+  .ps.done .ps-n{color:#15803d}
+  .ps-l{font-size:12px;font-weight:600;color:#4a5568}
+  .ps.active .ps-l{color:#1e40af}
+  .ps.done .ps-l{color:#166534}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+  .sec-lbl{font-size:11px;color:#8a96a3;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;font-family:monospace}
+  .instrucao{background:#eff6ff;border-left:3px solid #3b82f6;border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:#1e40af;line-height:1.6;margin-bottom:14px}
+  .prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .prob-card{background:#fff;border:1.5px solid #e2e8f0;border-radius:8px;padding:14px 16px;cursor:pointer;transition:all .15s}
+  .prob-card:hover{border-color:#94a3b8;background:#f8fafc}
+  .prob-card.sel{border-color:#22c55e;background:#f0fdf4}
+  .prob-mat{font-size:10px;font-weight:700;color:#8a96a3;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+  .prob-card.sel .prob-mat{color:#15803d}
+  .prob-txt{font-size:13px;color:#1a1a2e;line-height:1.4}
+  .prob-show{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:8px 12px;font-size:13px;color:#166534;margin-bottom:12px}
+  .est-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .est-card{border:1.5px solid #e2e8f0;border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .15s;background:#fff}
+  .est-card:hover{background:#f8fafc;border-color:#94a3b8}
+  .est-card.sel{border-color:#7c3aed;background:#f5f3ff}
+  .est-nome{font-size:13px;font-weight:600;color:#1a1a2e;margin-bottom:4px}
+  .est-card.sel .est-nome{color:#5b21b6}
+  .est-ex{font-size:11px;color:#64748b;font-family:monospace;line-height:1.6;white-space:pre}
+  .est-card.sel .est-ex{color:#7c3aed}
+  .est-dica{background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:10px 14px;font-size:13px;color:#5b21b6;line-height:1.5;margin-top:10px;display:none}
+  .est-dica.show{display:block}
+  .campo-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+  .campo-row input{flex:1;padding:8px 10px;border:1.5px solid #cbd5e1;border-radius:8px;background:#fff;color:#1a1a2e;font-size:13px;font-family:'Segoe UI',Arial,sans-serif;outline:none}
+  .campo-row input:focus{border-color:#3b82f6}
+  .rm{width:30px;height:30px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;color:#94a3b8;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+  .rm:hover{background:#fef2f2;border-color:#fca5a5;color:#dc2626}
+  .add-btn{padding:6px 14px;border:1.5px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;color:#64748b;font-family:'Segoe UI',Arial,sans-serif;margin-bottom:12px}
+  .add-btn:hover{background:#f8fafc;border-color:#94a3b8}
+  .preview{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-top:12px}
+  .preview-ttl{font-size:11px;color:#8a96a3;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;font-family:monospace}
+  .preview-body{font-size:12px;font-family:monospace;color:#475569;line-height:1.8;white-space:pre-wrap}
+  .algo-dicas{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+  .dica-chip{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:12px;color:#475569;cursor:pointer;line-height:1.4;transition:all .15s;font-family:'Segoe UI',Arial,sans-serif;text-align:left}
+  .dica-chip:hover{border-color:#94a3b8;background:#f1f5f9;color:#1a1a2e}
+  textarea{width:100%;padding:8px 10px;border:1.5px solid #cbd5e1;border-radius:8px;background:#fff;color:#1a1a2e;font-size:13px;font-family:'Segoe UI',Arial,sans-serif;outline:none;resize:vertical;line-height:1.7}
+  textarea:focus{border-color:#3b82f6}
+  .nav{display:flex;justify-content:space-between;margin-top:1rem;gap:8px}
+  .btn{padding:8px 20px;border:1.5px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer;font-size:14px;color:#1a1a2e;font-family:'Segoe UI',Arial,sans-serif;transition:all .15s}
+  .btn:hover{background:#f1f5f9;border-color:#94a3b8}
+  .btn-p{background:#1a3a5c;color:#fff;border-color:#1a3a5c}
+  .btn-p:hover{background:#0f2a47}
+  .av-ok{background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+  .av-parcial{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+  .av-erro{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+  .av-ttl{font-size:15px;font-weight:600;margin-bottom:6px}
+  .av-ok .av-ttl{color:#166534}
+  .av-parcial .av-ttl{color:#92400e}
+  .av-erro .av-ttl{color:#991b1b}
+  .av-desc{font-size:13px;line-height:1.6;margin-bottom:14px}
+  .av-ok .av-desc{color:#15803d}
+  .av-parcial .av-desc{color:#b45309}
+  .av-erro .av-desc{color:#b91c1c}
+  .pontuacao{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+  .pont-box{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px;text-align:center}
+  .pont-lbl{font-size:11px;color:#8a96a3;margin-bottom:4px}
+  .pont-val{font-size:22px;font-weight:700;font-family:monospace;color:#1a1a2e}
+  .criterio{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f1f5f9}
+  .criterio:last-child{border-bottom:none}
+  .crit-icon{width:22px;height:22px;border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+  .ci-ok{background:#dcfce7;color:#166534}
+  .ci-warn{background:#fef9c3;color:#92400e}
+  .ci-erro{background:#fee2e2;color:#991b1b}
+  .crit-ttl{font-size:13px;font-weight:600;color:#1a1a2e;margin-bottom:2px}
+  .crit-desc{font-size:12px;color:#64748b;line-height:1.5}
+  .ficha-final{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px}
+  .ficha-row{display:flex;gap:8px;font-size:13px;padding:6px 0;border-bottom:1px solid #f1f5f9}
+  .ficha-row:last-child{border-bottom:none}
+  .ficha-key{color:#64748b;min-width:130px;flex-shrink:0;font-weight:500}
+  .ficha-val{color:#1a1a2e;font-family:monospace;font-size:12px;line-height:1.5}
+  @media print{.nav,.algo-dicas{display:none}}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="hdr">
+    <div class="hdr-tag">Aula 7 — EF07CO03</div>
+    <h2>Do problema ao programa</h2>
+    <p>Passo a passo, você vai analisar um problema de outra matéria e decidir como um programa guardaria e usaria essas informações.</p>
+  </div>
+
+  <div class="prog" id="progBar">
+    <div class="ps active"><div class="ps-n">Etapa 1</div><div class="ps-l">Problema</div></div>
+    <div class="ps"><div class="ps-n">Etapa 2</div><div class="ps-l">Estrutura</div></div>
+    <div class="ps"><div class="ps-n">Etapa 3</div><div class="ps-l">Campos</div></div>
+    <div class="ps"><div class="ps-n">Etapa 4</div><div class="ps-l">Algoritmo</div></div>
+    <div class="ps"><div class="ps-n">Etapa 5</div><div class="ps-l">Avaliação</div></div>
+  </div>
+
+  <!-- ETAPA 1 -->
+  <div id="p0">
+    <div class="card">
+      <div class="sec-lbl">Etapa 1 de 5 — Escolha do problema</div>
+      <div class="instrucao"><strong>Escolha um problema de uma das matérias abaixo. O problema precisa envolver dados que um programa poderia guardar e usar.</strong></div>
+      <div class="prob-grid">
+        <div class="prob-card" onclick="selProb(0,this)">
+          <div class="prob-mat">Matemática</div>
+          <div class="prob-txt">Calcular a média de notas da turma no bimestre</div>
+        </div>
+        <div class="prob-card" onclick="selProb(1,this)">
+          <div class="prob-mat">Ciências</div>
+          <div class="prob-txt">Guardar dados dos planetas do Sistema Solar</div>
+        </div>
+        <div class="prob-card" onclick="selProb(2,this)">
+          <div class="prob-mat">Educação Física</div>
+          <div class="prob-txt">Registrar o tempo de corrida de cada aluno na olimpíada</div>
+        </div>
+        <div class="prob-card" onclick="selProb(3,this)">
+          <div class="prob-mat">Geografia</div>
+          <div class="prob-txt">Comparar a temperatura média de cidades brasileiras</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav"><span></span><button class="btn btn-p" onclick="avancar(0)">Próxima etapa →</button></div>
+  </div>
+
+  <!-- ETAPA 2 -->
+  <div id="p1" style="display:none">
+    <div class="card">
+      <div class="sec-lbl">Etapa 2 de 5 — Escolha da estrutura de dados</div>
+      <div class="instrucao"><strong>Que tipo de "caixa" o programa vai usar para guardar as informações desse problema?</strong> Leia as opções com atenção e escolha a mais adequada.</div>
+      <div class="prob-show">Problema escolhido: <strong id="probShow"></strong></div>
+      <div class="est-grid">
+        <div class="est-card" onclick="selEst('variavel',this)">
+          <div class="est-nome">Variável simples</div>
+          <div class="est-ex">nota = 8</div>
+        </div>
+        <div class="est-card" onclick="selEst('lista',this)">
+          <div class="est-nome">Lista (vários itens iguais)</div>
+          <div class="est-ex">notas = [8, 6, 9, 7]</div>
+        </div>
+        <div class="est-card" onclick="selEst('ficha',this)">
+          <div class="est-nome">Ficha (campos com nome)</div>
+          <div class="est-ex">planeta = {
+  nome: "Marte",
+  diâmetro: 6779
+}</div>
+        </div>
+        <div class="est-card" onclick="selEst('lista_fichas',this)">
+          <div class="est-nome">Lista de fichas</div>
+          <div class="est-ex">planetas = [
+  {nome:"Terra",...},
+  {nome:"Marte",...}
+]</div>
+        </div>
+      </div>
+      <div class="est-dica" id="estDica"></div>
+    </div>
+    <div class="nav"><button class="btn" onclick="irPasso(0)">← Voltar</button><button class="btn btn-p" onclick="avancar(1)">Próxima etapa →</button></div>
+  </div>
+
+  <!-- ETAPA 3 -->
+  <div id="p2" style="display:none">
+    <div class="card">
+      <div class="sec-lbl">Etapa 3 de 5 — Liste os campos e variáveis</div>
+      <div class="instrucao"><strong>Quais informações o programa precisa guardar?</strong> Liste cada campo ou variável separadamente. Pense em tudo que será necessário para resolver o problema.</div>
+      <div id="camposList"></div>
+      <button class="add-btn" onclick="addCampo()">+ Adicionar campo</button>
+      <div class="preview">
+        <div class="preview-ttl">Como vai ficar no programa</div>
+        <div class="preview-body" id="prevBody">Adicione campos acima para ver a prévia...</div>
+      </div>
+    </div>
+    <div class="nav"><button class="btn" onclick="irPasso(1)">← Voltar</button><button class="btn btn-p" onclick="avancar(2)">Próxima etapa →</button></div>
+  </div>
+
+  <!-- ETAPA 4 -->
+  <div id="p3" style="display:none">
+    <div class="card">
+      <div class="sec-lbl">Etapa 4 de 5 — Esboço do algoritmo</div>
+      <div class="instrucao"><strong>Escreva os passos que o programa vai seguir, em ordem.</strong> Use português simples — não precisa ser código. Pense em três momentos: entrada de dados, processamento e saída.</div>
+      <div class="algo-dicas">
+        <div class="dica-chip" onclick="inserirDica('1. Receber (ler) os dados do usuário')">+ Dica: entrada de dados</div>
+        <div class="dica-chip" onclick="inserirDica('2. Processar os dados (calcular, comparar, contar...)')">+ Dica: processamento</div>
+        <div class="dica-chip" onclick="inserirDica('3. Mostrar o resultado para o usuário')">+ Dica: saída de dados</div>
+        <div class="dica-chip" onclick="inserirDica('   → Se [condição]: fazer X\n   → Senão: fazer Y')">+ Dica: condição (se/senão)</div>
+        <div class="dica-chip" onclick="inserirDica('   → Para cada item da lista: fazer algo')">+ Dica: repetição (para cada)</div>
+        <div class="dica-chip" onclick="inserirDica('   → Guardar o resultado em uma variável')">+ Dica: guardar resultado</div>
+      </div>
+      <textarea id="algoArea" rows="9" placeholder="1. &#10;2. &#10;3. "></textarea>
+    </div>
+    <div class="nav"><button class="btn" onclick="irPasso(2)">← Voltar</button><button class="btn btn-p" onclick="avancar(3)">Ver avaliação →</button></div>
+  </div>
+
+  <!-- ETAPA 5 -->
+  <div id="p4" style="display:none">
+    <div class="sec-lbl" style="margin-bottom:10px">Etapa 5 de 5 — Avaliação da modelagem</div>
+    <div id="avaliacaoBox"></div>
+    <div class="card" style="margin-top:1rem">
+      <div class="sec-lbl">Resumo da modelagem do grupo</div>
+      <div class="ficha-final" id="fichaFinal"></div>
+    </div>
+    <div class="nav">
+      <button class="btn" onclick="irPasso(3)">← Voltar e corrigir</button>
+      <button class="btn btn-p" onclick="window.print()">Imprimir ficha</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const PROBS = [
+  { mat: 'Matemática',     txt: 'Calcular a média de notas da turma no bimestre' },
+  { mat: 'Ciências',       txt: 'Guardar dados dos planetas do Sistema Solar' },
+  { mat: 'Educação Física',txt: 'Registrar o tempo de corrida de cada aluno na olimpíada' },
+  { mat: 'Geografia',      txt: 'Comparar a temperatura média de cidades brasileiras' }
+];
+
+const DICAS = {
+  variavel:    'Variável simples guarda apenas UM valor de uma vez. Faz sentido quando o problema tem um único dado (ex.: a nota de um único aluno). Para vários dados, uma lista ou ficha seria melhor.',
+  lista:       'Lista (vetor) guarda vários valores do mesmo tipo em sequência, identificados pela posição (0, 1, 2...). Ótima quando todos os itens são da mesma natureza — várias notas, vários tempos, várias temperaturas.',
+  ficha:       'Ficha (registro) guarda vários campos com nomes diferentes sobre um único objeto. Perfeita quando um objeto tem características variadas — por exemplo, um planeta com nome, diâmetro e distância do Sol.',
+  lista_fichas:'Lista de fichas combina os dois: vários objetos, cada um com múltiplos campos. Ideal quando temos muitos itens e cada um tem várias informações — vários planetas, cada um com nome, diâmetro e distância.'
+};
+
+const NOMES = {
+  variavel:    'Variável simples',
+  lista:       'Lista (vetor)',
+  ficha:       'Ficha (registro)',
+  lista_fichas:'Lista de fichas'
+};
+
+const MELHOR = { 0:'lista', 1:'lista_fichas', 2:'lista', 3:'lista' };
+
+let probIdx = -1, estSel = '', campos = [];
+
+function selProb(i, el) {
+  probIdx = i;
+  document.querySelectorAll('.prob-card').forEach((c, j) => c.classList.toggle('sel', j === i));
+}
+
+function getProb() {
+  return probIdx >= 0 ? PROBS[probIdx].txt : '';
+}
+
+function selEst(est, el) {
+  estSel = est;
+  document.querySelectorAll('.est-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  const d = document.getElementById('estDica');
+  d.textContent = DICAS[est];
+  d.className = 'est-dica show';
+  atualizarPreview();
+}
+
+function addCampo() { campos.push(''); renderCampos(); }
+function remCampo(i) { campos.splice(i, 1); renderCampos(); }
+function updCampo(i, v) { campos[i] = v; atualizarPreview(); }
+
+function renderCampos() {
+  document.getElementById('camposList').innerHTML = campos.map((c, i) =>
+    `<div class="campo-row">
+       <input type="text" placeholder="Ex: nome, nota, tempo, temperatura..." value="${c.replace(/"/g,'&quot;')}" oninput="updCampo(${i},this.value)">
+       <button class="rm" onclick="remCampo(${i})">&#x2715;</button>
+     </div>`
+  ).join('');
+  atualizarPreview();
+}
+
+function atualizarPreview() {
+  const cs = campos.filter(c => c.trim());
+  if (!estSel || cs.length === 0) { document.getElementById('prevBody').textContent = 'Adicione campos acima para ver a prévia...'; return; }
+  let txt = '';
+  if (estSel === 'variavel')     txt = cs.map(c => `${c} = ?`).join('\n');
+  else if (estSel === 'lista')   txt = `${cs[0]||'dados'} = [?, ?, ?, ...]`;
+  else if (estSel === 'ficha')   txt = `objeto = {\n${cs.map(c=>`  ${c}: ?`).join(',\n')}\n}`;
+  else if (estSel === 'lista_fichas') txt = `lista = [\n  { ${cs.slice(0,3).map(c=>`${c}: ?`).join(', ')}${cs.length>3?' ...':''} },\n  { ${cs.slice(0,3).map(c=>`${c}: ?`).join(', ')}${cs.length>3?' ...':''} },\n  ...\n]`;
+  document.getElementById('prevBody').textContent = txt;
+}
+
+function inserirDica(txt) {
+  const a = document.getElementById('algoArea');
+  a.value = a.value ? a.value + '\n' + txt : txt;
+}
+
+function irPasso(n) {
+  for (let i = 0; i <= 4; i++) {
+    const el = document.getElementById('p' + i);
+    if (el) el.style.display = i === n ? 'block' : 'none';
+  }
+  document.querySelectorAll('.ps').forEach((s, i) => {
+    s.className = 'ps' + (i < n ? ' done' : i === n ? ' active' : '');
+  });
+}
+
+function avancar(from) {
+  if (from === 0) {
+    if (probIdx < 0) { alert('Escolha um dos problemas antes de continuar.'); return; }
+    document.getElementById('probShow').textContent = getProb();
+    if (campos.length === 0) { campos = ['', '']; renderCampos(); }
+  }
+  if (from === 1 && !estSel) { alert('Escolha uma estrutura de dados antes de continuar.'); return; }
+  if (from === 2 && campos.filter(c => c.trim()).length === 0) { alert('Adicione pelo menos um campo antes de continuar.'); return; }
+  if (from === 3) gerarAvaliacao();
+  irPasso(from + 1);
+}
+
+function gerarAvaliacao() {
+  const prob = getProb();
+  const cs   = campos.filter(c => c.trim());
+  const algo = document.getElementById('algoArea').value.trim();
+  const crit = [];
+  let pts = 0;
+
+  crit.push({ ok:'ok', ttl:'Problema selecionado', desc:`Problema escolhido: "${prob}". O ponto de partida está definido.` });
+  pts++;
+
+  const melhor = MELHOR[probIdx];
+  if (estSel === melhor) {
+    crit.push({ ok:'ok', ttl:'Estrutura de dados adequada', desc:'A estrutura escolhida (' + NOMES[estSel] + ') é a mais indicada para este problema. Boa escolha!' });
+    pts++;
+  } else {
+    crit.push({ ok:'warn', ttl:'Estrutura pode ser melhorada', desc:`Para este problema, "${NOMES[melhor]}" seria mais adequada. A escolha atual (${NOMES[estSel]}) funciona parcialmente, mas pode gerar limitações.` });
+    pts += 0.5;
+  }
+
+  if (cs.length >= 2) {
+    crit.push({ ok:'ok', ttl:'Campos bem listados', desc:`Foram listados ${cs.length} campo(s): ${cs.join(', ')}. Isso é suficiente para começar a programar.` });
+    pts++;
+  } else if (cs.length === 1) {
+    crit.push({ ok:'warn', ttl:'Poucos campos listados', desc:'Só um campo foi listado. O programa vai precisar guardar mais informações para funcionar?' });
+    pts += 0.5;
+  } else {
+    crit.push({ ok:'erro', ttl:'Nenhum campo listado', desc:'É necessário listar os campos e variáveis que o programa vai usar.' });
+  }
+
+  const linhas = algo.split('\n').filter(l => l.trim()).length;
+  if (linhas >= 3) {
+    crit.push({ ok:'ok', ttl:'Algoritmo com boa estrutura', desc:`O algoritmo tem ${linhas} passos. Entrada, processamento e saída foram considerados.` });
+    pts++;
+  } else if (linhas >= 1) {
+    crit.push({ ok:'warn', ttl:'Algoritmo incompleto', desc:'O algoritmo tem poucos passos. Inclua: (1) como os dados entram, (2) o que o programa calcula, (3) como o resultado aparece.' });
+    pts += 0.5;
+  } else {
+    crit.push({ ok:'erro', ttl:'Algoritmo não preenchido', desc:'Escreva os passos que o programa vai seguir. Use português simples — não precisa ser código.' });
+  }
+
+  const pct = Math.round((pts / 4) * 100);
+  let avCls, avTtl, avDesc;
+  if (pct >= 85)      { avCls = 'av-ok';     avTtl = 'Modelagem completa!';          avDesc = 'O grupo fez uma boa análise do problema. A modelagem está pronta para ser implementada em código na próxima aula.'; }
+  else if (pct >= 55) { avCls = 'av-parcial'; avTtl = 'Modelagem quase pronta';       avDesc = 'A modelagem está no caminho certo, mas alguns pontos precisam ser revisados antes de partir para o código. Veja os critérios abaixo.'; }
+  else                { avCls = 'av-erro';    avTtl = 'Modelagem precisa de revisão'; avDesc = 'Alguns pontos importantes estão incompletos. Revise cada critério abaixo e volte para corrigir.'; }
+
+  const criHtml = crit.map(c => {
+    const ico  = c.ok === 'ok' ? '&#10003;' : c.ok === 'warn' ? '!' : '&#10005;';
+    const icls = c.ok === 'ok' ? 'ci-ok'    : c.ok === 'warn' ? 'ci-warn' : 'ci-erro';
+    return `<div class="criterio"><div class="crit-icon ${icls}">${ico}</div><div><div class="crit-ttl">${c.ttl}</div><div class="crit-desc">${c.desc}</div></div></div>`;
+  }).join('');
+
+  document.getElementById('avaliacaoBox').innerHTML = `
+    <div class="${avCls}">
+      <div class="av-ttl">${avTtl}</div>
+      <div class="av-desc">${avDesc}</div>
+      <div class="pontuacao">
+        <div class="pont-box"><div class="pont-lbl">Pontuação</div><div class="pont-val">${pts.toFixed(1)} / 4</div></div>
+        <div class="pont-box"><div class="pont-lbl">Aproveitamento</div><div class="pont-val">${pct}%</div></div>
+        <div class="pont-box"><div class="pont-lbl">Critérios OK</div><div class="pont-val">${crit.filter(c=>c.ok==='ok').length} / 4</div></div>
+      </div>
+      ${criHtml}
+    </div>`;
+
+  document.getElementById('fichaFinal').innerHTML = `
+    <div class="ficha-row"><div class="ficha-key">Matéria</div><div class="ficha-val">${PROBS[probIdx].mat}</div></div>
+    <div class="ficha-row"><div class="ficha-key">Problema</div><div class="ficha-val">${prob}</div></div>
+    <div class="ficha-row"><div class="ficha-key">Estrutura</div><div class="ficha-val">${NOMES[estSel]||'—'}</div></div>
+    <div class="ficha-row"><div class="ficha-key">Campos / variáveis</div><div class="ficha-val">${cs.length > 0 ? cs.join(', ') : '—'}</div></div>
+    <div class="ficha-row"><div class="ficha-key">Algoritmo</div><div class="ficha-val">${algo||'—'}</div></div>`;
+}
+</script>
+</body>
+</html>
